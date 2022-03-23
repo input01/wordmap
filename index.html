@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+
+<body>
+<div id="container"></div>
+<div id="test-svg"></div>
+
+</body>
+<script src="d3.min.js"></script>
+<script type="text/javascript" src="world-countries.json"></script>
+<script>
+    window.onload = function () {
+        // 地图绘制
+        var width = 1200,
+            height = 800;
+        var svg = d3.select("#test-svg")
+            .append('svg')
+            .attr('width', width + 'px')
+            .attr('height', height + 'px').style("border", "solid 6px rgb(215, 215, 215)");
+        var projection = d3.geoMercator()
+            .center([0, 0])
+            .scale(200)
+            .translate([width / 2, height / 2]);
+        var path = d3.geoPath().projection(projection);
+        var features = worldGeojson.features;
+        svg.append('g')
+            .attr('class', 'map')
+            .attr('stroke', 'white')
+            .selectAll()
+            .data(features)
+            .join('path')
+            .attr("fill", function (d, i) {
+                return "#D7D7D7";
+            })
+            .attr('d', path)
+        // .on("mouseover", function(d, i) {
+        //  d3.select(this)
+        //    .attr("fill", "#FF0000");
+        // })
+        // .on("mouseout", function(d, i) {
+        //  d3.select(this)
+        //    .attr("fill", "#D7D7D7");
+        // });
+
+        // 圆环绘制
+        data = [
+            {"color": "red", "value": 50},
+            {"color": "green", "value": 50},
+        ]
+        console.log(data);
+        var sum = d3.sum(data.map(function (d) {
+            return d.value
+        }))
+
+        for (i in data) {
+            data[i].Percentage = (data[i].value / sum * 100).toFixed(0) + "%";
+        }
+        // console.log(data);
+
+        var xy = projection([116.451412, 39.988609]);
+        console.log(projection([0, 0]));
+        console.log(xy);
+
+        var pie = svg.append("g")
+            .attr("transform", "translate(" + xy[0] + "," + xy[1] + ")");
+        pie.append("text")
+            .attr("x", -5)
+            .attr("y", 5)
+            .text("2")
+            .attr("fill", "black");
+
+        var arc_generator = d3.arc()
+            .innerRadius(64 / 6)
+            .outerRadius(64 / 4)
+        // .startAngle(0)
+        // .endAngle(120*Math.PI/180);
+
+        var angle_data = d3.pie()
+            .value(function (d) {
+                return d.value;
+            })
+        // console.log(angle_data(data));
+
+        // var color = d3.schemeCategory10;
+        // 绿色，红色
+        var color = ["#ad0b0b", "#2da44c"];
+        // console.log(color)
+
+        //生成内部圆环
+        pie.selectAll("path")
+            .data(angle_data(data))
+            .enter()
+            .append("path")
+            .attr("d", arc_generator)
+            .style("fill", function (d, i) {
+                return color[i];
+            })
+
+    }
+</script>
+</html>
+
